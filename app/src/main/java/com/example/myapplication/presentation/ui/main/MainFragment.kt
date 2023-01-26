@@ -1,6 +1,7 @@
-package com.example.myapplication.ui
+package com.example.myapplication.presentation.ui.main
 
 import android.app.AlertDialog
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,23 +10,52 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieAnimationView
 import com.example.myapplication.R
-import com.example.myapplication.model.Gift
-import com.example.myapplication.model.levelsGame
+import com.example.myapplication.data.local.entity.history.HistoryEntity
+import com.example.myapplication.data.model.gift.Gift
+import com.example.myapplication.data.model.gift.levelsGame
+import com.example.myapplication.data.model.local.position.Position
+import com.example.myapplication.presentation.ui.main.adapter.HistoryAdapter
+import com.example.myapplication.presentation.ui.main.viewModel.MainViewModel
 import com.example.myapplication.ui.view.CustomView
 import com.example.myapplication.ui.view.GameTask
 import com.example.myapplication.utils.Constants
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 
-class MainFragment : Fragment(R.layout.main_fragment), GameTask {
+
+@AndroidEntryPoint
+class MainFragment : Fragment(R.layout.fragment_main), GameTask {
 
     private lateinit var floatButton: FloatingActionButton
     private lateinit var gameLayout: ConstraintLayout
     private lateinit var customView: CustomView
+    private lateinit var lottieAnimationView: LottieAnimationView
+    private lateinit var historyTextView: TextView
+    private lateinit var newsTextView: TextView
+    private lateinit var adView: AdView
+
+    private lateinit var adapter: HistoryAdapter
 
     private var level = 1
+
+    private lateinit var mp: MediaPlayer
+
+    private val viewModel: MainViewModel by viewModels()
+
+    private val mainScope = CoroutineScope(Dispatchers.Main)
+
+
 
     private fun updateDataCanvas() =
         CoroutineScope(Dispatchers.IO + Job()).launch {
@@ -41,10 +71,17 @@ class MainFragment : Fragment(R.layout.main_fragment), GameTask {
         super.onViewCreated(view, savedInstanceState)
 
         floatButton = view.findViewById(R.id.float_button)
-
         gameLayout = view.findViewById(R.id.game_layout)
+        lottieAnimationView = view.findViewById(R.id.lottie_animation_view)
+        historyTextView = view.findViewById(R.id.hitory_txt)
+        newsTextView = view.findViewById(R.id.news_txt)
+        adView = view.findViewById(R.id.adView)
 
 
+        lottieAnimationView.visibility = View.GONE
+
+
+        mp = MediaPlayer.create(requireContext(), R.raw.explosion_sound)
 
         floatButton.setOnClickListener {
             if (isGameStart.value != null) {
@@ -56,37 +93,63 @@ class MainFragment : Fragment(R.layout.main_fragment), GameTask {
         isGameStart.observe(viewLifecycleOwner) { isStart ->
             if (isStart != null) {
                 if (isStart) {
+                    historyTextView.visibility = View.GONE
                     floatButton.visibility = View.GONE
+                    newsTextView.visibility = View.GONE
+                    adView.visibility = View.GONE
                     gameView()
                 } else {
+                    historyTextView.visibility = View.VISIBLE
                     floatButton.visibility = View.VISIBLE
+                    newsTextView.visibility = View.VISIBLE
+                    showAds()
                 }
             }
         }
 
+        historyTextView.setOnClickListener {
+            historyAlertDialog()
+        }
 
+        newsTextView.setOnClickListener {
+//            findNavController().popBackStack()
+            findNavController().navigate(R.id.newsFragment)
+        }
     }
-
 
     private fun gameView() {
         customView = CustomView(requireContext(), this)
-        customView.setWindowManager(windowManager = requireActivity().windowManager)
-
         customView.setData(levelsGame(level)!!.shuffled(), level)
-
         gameLayout.addView(customView)
 
         updateDataCanvas()
     }
 
-    override fun nextLevel(gift: Gift) {
+    override fun nextLevel(gift: Gift, position: Position) {
         updateDataCanvas().cancel()
 
-        if (gift.isWinGift) {
-            nextLevelAlertDialog(gift)
-        } else {
-            loseAlertDialog(message = Constants.BOX_IS_EMPTY)
+        mainScope.launch {
+
+            lottieAnimationView.layoutParams.width = position.width * 3
+            lottieAnimationView.layoutParams.height = position.height * 3
+            lottieAnimationView.x = position.x - position.width
+            lottieAnimationView.y = position.y - position.height
+            lottieAnimationView.visibility = View.VISIBLE
+            mp.start()
+            lottieAnimationView.speed = 0.4f
+
+            lottieAnimationView.playAnimation()
+
+            delay(lottieAnimationView.duration * 4)
+
+            lottieAnimationView.visibility = View.GONE
+            if (gift.isWinGift) {
+                nextLevelAlertDialog(gift)
+            } else {
+                loseAlertDialog(message = Constants.BOX_IS_EMPTY)
+            }
         }
+
     }
 
     override fun loseGame(message: String) {
@@ -154,6 +217,7 @@ class MainFragment : Fragment(R.layout.main_fragment), GameTask {
         giveGiftBtn.setOnClickListener {
             alertDialog.cancel()
             giveGiftAlertDialog(gift)
+            viewModel.addHistory(HistoryEntity(prizeWon = gift.inside, level = level))
         }
 
         alertDialog.setCancelable(false)
@@ -199,5 +263,40 @@ class MainFragment : Fragment(R.layout.main_fragment), GameTask {
         alertDialog.show()
     }
 
+
+    private fun historyAlertDialog() {
+        val dialog: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+
+        val inflater: LayoutInflater = LayoutInflater.from(requireContext())
+        val loseView: View = inflater.inflate(R.layout.dialog_history, null)
+        dialog.setView(loseView)
+
+        val recyclerView = loseView.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val layoutManager = LinearLayoutManager(requireContext())
+        layoutManager.orientation = LinearLayoutManager.VERTICAL
+        recyclerView.layoutManager = layoutManager
+        adapter = HistoryAdapter()
+        recyclerView.adapter = adapter
+
+        val observer = Observer<List<HistoryEntity>> {
+            adapter.setData(it)
+        }
+
+        viewModel.histories.observe(viewLifecycleOwner, observer)
+
+        dialog.setOnDismissListener {
+            viewModel.histories.removeObserver(observer)
+        }
+
+
+        dialog.show()
+    }
+
+
+    private fun showAds() {
+        adView.visibility = View.VISIBLE
+        val request = AdRequest.Builder().build()
+        adView.loadAd(request)
+    }
 
 }

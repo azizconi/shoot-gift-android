@@ -6,6 +6,14 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.example.myapplication.ui.MainFragment"
-        android:label="MainFragment" />
+        android:name="com.example.myapplication.presentation.ui.main.MainFragment"
+        android:label="MainFragment" >
+        <action
+            android:id="@+id/action_mainFragment_to_newsFragment"
+            app:destination="@id/newsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/newsFragment"
+        android:name="com.example.myapplication.presentation.ui.news.NewsFragment"
+        android:label="NewsFragment" />
 </navigation>

@@ -11,4 +11,9 @@ object Constants {
     const val BALL_IN_LINE_MESSAGE = "Мяч попал в линию"
     const val BOX_IS_EMPTY = "Эта коробка была пуста :("
 
+    const val NEWS_API = "472e3f34fec24e96b91d0a4bcfe6887b"
+    const val BASE_URL = "https://newsapi.org/"
+
+    const val HttpExceptionError = "Ой что-то пошло не так"
+    const val IOExceptionError = "Ошибка сервера, проверьте подключение к интернету"
 }

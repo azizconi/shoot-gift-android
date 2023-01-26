@@ -1,20 +1,21 @@
 package com.example.myapplication.ui.view
 
 import android.content.Context
-import android.graphics.*
-import android.os.Build
+import android.content.res.Resources
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.view.MotionEvent
 import android.view.View
-import android.view.WindowManager
-import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.example.myapplication.R
-import com.example.myapplication.model.Gift
+import com.example.myapplication.data.model.gift.Gift
+import com.example.myapplication.data.model.local.position.Position
 import com.example.myapplication.utils.Constants
-import kotlinx.coroutines.*
 import kotlin.math.abs
 import kotlin.math.atan
+
 
 class CustomView(
     context: Context,
@@ -26,7 +27,7 @@ class CustomView(
     private var isGameEnd: Boolean = false
 
 
-    private lateinit var paint: Paint
+    private var paint: Paint = Paint()
     private var xPos = 0f
     private var yPos = 0f
 
@@ -43,11 +44,8 @@ class CustomView(
     private var yEndPointer = 0f
 
 
-
     private var gifts: List<Gift>? = null
     private var levelGame: Int = 1
-
-    private lateinit var windowManager: WindowManager
 
 
     private var startLineX = 100f
@@ -55,14 +53,14 @@ class CustomView(
     private var directionLineX = 1.0
     private var endLineX = (600).toFloat()
 
-    fun setWindowManager(windowManager: WindowManager) {
-        this.windowManager = windowManager
+    private var metrics = Resources.getSystem().displayMetrics
 
-        xPos = (windowManager.defaultDisplay.width / 2).toFloat()
-        yPos = (windowManager.defaultDisplay.height * 80 / 100).toFloat()
+    init {
+        xPos = (metrics.widthPixels / 2).toFloat()
+        yPos = (metrics.heightPixels * 80 / 100).toFloat()
 
-        xStartPointer = (windowManager.defaultDisplay.width / 2).toFloat() + 40
-        yStartPointer = (windowManager.defaultDisplay.height * 80 / 100).toFloat() + 40
+        xStartPointer = (metrics.widthPixels / 2).toFloat() + 40
+        yStartPointer = (metrics.heightPixels * 80 / 100).toFloat() + 40
     }
 
     fun setData(list: List<Gift>, level: Int) {
@@ -74,13 +72,12 @@ class CustomView(
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
 
         fun items(data: List<Gift>) {
-            val borderToNextItem = display.width / 3
+            val borderToNextItem = metrics.widthPixels / 3
             var itemX = if (data.size % 2 == 0) {
                 (borderToNextItem / 3).toFloat()
             } else {
@@ -88,14 +85,15 @@ class CustomView(
             }
             var itemY = 80f
 
-            for (item in data) {
+            for (item in data.indices) {
                 try {
+
+
                     val gift =
                         ResourcesCompat.getDrawable(context.resources, R.drawable.gift_icon, null)
                             ?.toBitmap(width = borderToNextItem / 2, height = borderToNextItem / 2)
 
                     canvas?.drawBitmap(gift!!, itemX, itemY, paint)
-
 
                     if (isShootBall) {
                         if (
@@ -105,21 +103,24 @@ class CustomView(
                             xPos + 60 in itemX..itemX + ((borderToNextItem - 20) / 2)
                         ) {
                             isGameEnd = true
-                            gameTask.nextLevel(item)
+                            gameTask.nextLevel(
+                                data[item],
+                                Position(gift!!.width, gift.height, itemX, itemY)
+                            )
                             isShootBall = false
                         }
                     }
 
 
                     itemX += borderToNextItem
-                    if (itemX > display.width) {
+                    if (itemX > metrics.widthPixels) {
                         itemX = (borderToNextItem / 3).toFloat()
                         itemY += borderToNextItem / 1.5f
                     }
 
 
                 } catch (e: Exception) {
-
+                    e.printStackTrace()
                 }
             }
 
@@ -127,14 +128,9 @@ class CustomView(
 
 
 
-        paint = Paint()
         paint.color = Color.LTGRAY
         paint.style = Paint.Style.FILL
         paint.strokeWidth = 2f
-
-
-        val display = windowManager.defaultDisplay
-
 
         val bitmap = ResourcesCompat.getDrawable(context.resources, R.drawable.ball_icon, null)
             ?.toBitmap(width = 80, height = 80)
@@ -160,14 +156,14 @@ class CustomView(
             if (xPos <= 0) {
                 directionX = 1.0
 
-            } else if (xPos >= display.width) {
+            } else if (xPos >= metrics.widthPixels) {
                 directionX = -1.0
             }
 
 
             if (yPos <= 0) {
                 directionY = 1.0
-            } else if (yPos >= display.height - 80) {
+            } else if (yPos >= metrics.heightPixels - 80) {
                 directionY = -1.0
                 isGameEnd = true
                 gameTask.loseGame(Constants.BALL_DONT_TOUCH_TO_BOX_MESSAGE)
@@ -178,21 +174,15 @@ class CustomView(
         }
 
 
-        paint = Paint()
         paint.color = Color.BLACK
         paint.style = Paint.Style.FILL
         paint.strokeWidth = 10f
 
 
-        if (levelGame == 2 || levelGame == 3) {
-
-            canvas?.drawLine(/*startX, startY, 50f, paint*/startLineX,
-                startStartAndEndLineY,
-                endLineX,
-                startStartAndEndLineY,
-                paint
+        if (levelGame in 2..3) {
+            canvas?.drawLine(
+                startLineX, startStartAndEndLineY, endLineX, startStartAndEndLineY, paint
             )
-
 
             if (
                 yPos in startStartAndEndLineY - 10..startStartAndEndLineY + 10 &&
@@ -210,23 +200,17 @@ class CustomView(
                 isGameEnd = true
             }
 
-                if (startLineX < 0) {
-                    directionLineX = 1.0
-                } else if (endLineX >= display.width) {
-                    directionLineX = -1.0
-                }
+            if (startLineX < 0) {
+                directionLineX = 1.0
+            } else if (endLineX >= metrics.widthPixels) {
+                directionLineX = -1.0
+            }
 
             if (!isGameEnd) {
                 startLineX += directionLineX.toFloat() * speed
                 endLineX += directionLineX.toFloat() * speed
             }
-
-
         }
-
-
-
-
     }
 
 
@@ -239,7 +223,7 @@ class CustomView(
                 MotionEvent.ACTION_DOWN -> {
 
                     xEndPointer = event.x
-                    if ((windowManager.defaultDisplay.height * 78 / 100).toFloat() >= event.y) {
+                    if ((metrics.heightPixels * 78 / 100).toFloat() >= event.y) {
                         yEndPointer = event.y
                     }
 
@@ -247,7 +231,7 @@ class CustomView(
                 MotionEvent.ACTION_MOVE -> {
                     isShowLine = true
                     xEndPointer = event.x
-                    if ((windowManager.defaultDisplay.height * 78 / 100).toFloat() >= event.y) {
+                    if ((metrics.heightPixels * 78 / 100).toFloat() >= event.y) {
                         yEndPointer = event.y
                     }
                 }
@@ -301,6 +285,7 @@ class CustomView(
 
         return true
     }
+
 }
 
 

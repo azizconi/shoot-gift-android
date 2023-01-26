@@ -1,4 +1,4 @@
-package com.example.myapplication.model
+package com.example.myapplication.data.model.gift
 
 import com.example.myapplication.utils.Constants
 
