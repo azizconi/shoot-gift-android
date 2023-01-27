@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-black"
         android:text="🎉🎉🎉Поздравляем🎉🎉🎉"
-        android:textColor="@color/black"
+        android:textColor="@color/text_color"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/image_win" />
@@ -34,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Вы выиграли 1000мб"
-        android:textColor="@color/black"
+        android:textColor="@color/text_color"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="10dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -52,6 +52,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView1"
-        android:backgroundTint="#9A4B4B"/>
+        android:backgroundTint="#9A4B4B"
+        android:textColor="@color/white"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

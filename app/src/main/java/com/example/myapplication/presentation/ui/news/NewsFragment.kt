@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -21,6 +22,7 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
 
     private lateinit var backBtn: ImageView
     private lateinit var recyclerView: RecyclerView
+    private lateinit var topBarName: TextView
 
     private lateinit var adapter: NewsAdapter
 
@@ -35,7 +37,10 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
         backBtn = view.findViewById(R.id.back_btn)
         progressBar = view.findViewById(R.id.progress_bar)
         recyclerView = view.findViewById(R.id.news_recycler_view)
+        topBarName = view.findViewById(R.id.top_bar_name)
 
+
+        topBarName.text = "Новости"
 
         val layoutManager = LinearLayoutManager(requireContext())
         layoutManager.orientation = LinearLayoutManager.VERTICAL
@@ -44,7 +49,7 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
         recyclerView.adapter = adapter
 
         backBtn.setOnClickListener {
-            findNavController().popBackStack()
+            findNavController().navigateUp()
         }
 
         val newsObserver = Observer<List<ArticleEntity>> { state ->

@@ -8,6 +8,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import com.example.myapplication.data.local.entity.history.HistoryEntity
+import com.example.myapplication.utils.convertDate
+import okhttp3.internal.http.toHttpDateString
+import java.util.*
 
 class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
@@ -15,7 +18,6 @@ class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() 
 
     fun setData(histories: List<HistoryEntity>) {
         this.histories = histories
-        Log.e("TAG", "setData: ${histories}", )
         notifyDataSetChanged()
     }
 
@@ -29,9 +31,10 @@ class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() 
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
         val currentItem = histories[position]
-        holder.id.text = currentItem.id.toString()
         holder.prize.text = currentItem.prizeWon
-        holder.level.text = currentItem.level.toString()
+        holder.level.text =  "Уровень: ${currentItem.level}"
+//        Log.e("TAG", "onBindViewHolder: $", )
+        holder.date.text = convertDate(currentItem.date.toString()/*toHttpDateString()*/)
     }
 
     override fun getItemCount(): Int {
@@ -41,9 +44,9 @@ class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() 
 
 
     class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var id: TextView = itemView.findViewById(R.id.history_id_txt)
         val prize: TextView = itemView.findViewById(R.id.won_prize_txt)
         val level: TextView = itemView.findViewById(R.id.won_level_txt)
+        val date: TextView = itemView.findViewById(R.id.won_date_txt)
     }
 
 

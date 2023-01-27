@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-medium"
         android:text="Эта коробка была пуста :("
-        android:textColor="@color/black"
+        android:textColor="@color/text_color"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
@@ -38,6 +38,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/message_textView"
-        android:backgroundTint="#9A4B4B"/>
+        android:backgroundTint="#9A4B4B"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

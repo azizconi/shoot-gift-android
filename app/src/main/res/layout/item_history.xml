@@ -1,42 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    >
-
+    android:layout_height="115dp"
+    android:paddingHorizontal="16dp"
+    android:background="@drawable/card_corner"
+    android:layout_marginTop="16dp">
 
     <TextView
-        android:id="@+id/history_id_txt"
+        android:id="@+id/won_prize_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="id"
-        android:textColor="@color/black"
-        android:textSize="18sp"
+        android:text="Приз: Вы получили приз Приз: Вы получили приз Приз: Вы получили приз "
+        android:maxLines="2"
+        android:textColor="@color/text_color"
+        android:fontFamily="sans-serif-black"
+        android:textSize="17sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 
     <TextView
-        android:id="@+id/won_prize_txt"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:text="text"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toStartOf="@+id/won_level_txt"
-        app:layout_constraintStart_toEndOf="@+id/history_id_txt"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
         android:id="@+id/won_level_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="won_level_txt"
-        android:textColor="@color/black"
+        android:text="Уровень: 1"
+        android:textColor="@color/text_color"
+        android:paddingTop="6dp"
         android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/won_prize_txt" />
+
+    <TextView
+        android:id="@+id/won_date_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="8dp"
+        android:text="12.12.2023 15:22"
+        android:textColor="@color/text_color"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

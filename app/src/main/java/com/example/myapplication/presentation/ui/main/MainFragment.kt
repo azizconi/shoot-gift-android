@@ -12,18 +12,14 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
 import com.example.myapplication.R
 import com.example.myapplication.data.local.entity.history.HistoryEntity
 import com.example.myapplication.data.model.gift.Gift
 import com.example.myapplication.data.model.gift.levelsGame
 import com.example.myapplication.data.model.local.position.Position
-import com.example.myapplication.presentation.ui.main.adapter.HistoryAdapter
-import com.example.myapplication.presentation.ui.main.viewModel.MainViewModel
+import com.example.myapplication.presentation.ui.main.viewModel.HistoryViewModel
 import com.example.myapplication.ui.view.CustomView
 import com.example.myapplication.ui.view.GameTask
 import com.example.myapplication.utils.Constants
@@ -32,6 +28,7 @@ import com.google.android.gms.ads.AdView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import java.util.*
 
 
 @AndroidEntryPoint
@@ -45,16 +42,14 @@ class MainFragment : Fragment(R.layout.fragment_main), GameTask {
     private lateinit var newsTextView: TextView
     private lateinit var adView: AdView
 
-    private lateinit var adapter: HistoryAdapter
 
     private var level = 1
 
     private lateinit var mp: MediaPlayer
 
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: HistoryViewModel by viewModels()
 
     private val mainScope = CoroutineScope(Dispatchers.Main)
-
 
 
     private fun updateDataCanvas() =
@@ -108,7 +103,8 @@ class MainFragment : Fragment(R.layout.fragment_main), GameTask {
         }
 
         historyTextView.setOnClickListener {
-            historyAlertDialog()
+//            historyAlertDialog()
+            findNavController().navigate(R.id.historyFragment)
         }
 
         newsTextView.setOnClickListener {
@@ -146,6 +142,13 @@ class MainFragment : Fragment(R.layout.fragment_main), GameTask {
             if (gift.isWinGift) {
                 nextLevelAlertDialog(gift)
             } else {
+                viewModel.addHistory(
+                    HistoryEntity(
+                        prizeWon = Constants.BOX_IS_EMPTY,
+                        level = level,
+                        date = Date()
+                    )
+                )
                 loseAlertDialog(message = Constants.BOX_IS_EMPTY)
             }
         }
@@ -153,6 +156,14 @@ class MainFragment : Fragment(R.layout.fragment_main), GameTask {
     }
 
     override fun loseGame(message: String) {
+        viewModel.addHistory(
+            HistoryEntity(
+                prizeWon = message,
+                level = level,
+                date = Date()
+            )
+        )
+
         loseAlertDialog(message = message)
         updateDataCanvas().cancel()
         gameLayout.removeAllViews()
@@ -217,7 +228,13 @@ class MainFragment : Fragment(R.layout.fragment_main), GameTask {
         giveGiftBtn.setOnClickListener {
             alertDialog.cancel()
             giveGiftAlertDialog(gift)
-            viewModel.addHistory(HistoryEntity(prizeWon = gift.inside, level = level))
+            viewModel.addHistory(
+                HistoryEntity(
+                    prizeWon = gift.inside,
+                    level = level,
+                    date = Date()
+                )
+            )
         }
 
         alertDialog.setCancelable(false)
@@ -261,35 +278,6 @@ class MainFragment : Fragment(R.layout.fragment_main), GameTask {
         }
 
         alertDialog.show()
-    }
-
-
-    private fun historyAlertDialog() {
-        val dialog: AlertDialog.Builder = AlertDialog.Builder(requireContext())
-
-        val inflater: LayoutInflater = LayoutInflater.from(requireContext())
-        val loseView: View = inflater.inflate(R.layout.dialog_history, null)
-        dialog.setView(loseView)
-
-        val recyclerView = loseView.findViewById<RecyclerView>(R.id.history_recycler_view)
-        val layoutManager = LinearLayoutManager(requireContext())
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
-        recyclerView.layoutManager = layoutManager
-        adapter = HistoryAdapter()
-        recyclerView.adapter = adapter
-
-        val observer = Observer<List<HistoryEntity>> {
-            adapter.setData(it)
-        }
-
-        viewModel.histories.observe(viewLifecycleOwner, observer)
-
-        dialog.setOnDismissListener {
-            viewModel.histories.removeObserver(observer)
-        }
-
-
-        dialog.show()
     }
 
 
