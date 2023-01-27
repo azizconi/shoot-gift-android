@@ -46,11 +46,11 @@ class HistoryFragment: Fragment(R.layout.fragment_history) {
         adapter = HistoryAdapter()
         recyclerView.adapter = adapter
 
-        val observer = Observer<List<HistoryEntity>> {
-            adapter.setData(it.asReversed())
-        }
 
-        viewModel.histories.observe(viewLifecycleOwner, observer)
+
+        viewModel.histories.observe(viewLifecycleOwner) {
+                adapter.setData(it.asReversed() ?: emptyList())
+        }
 
     }
 

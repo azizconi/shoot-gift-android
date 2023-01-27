@@ -10,7 +10,7 @@ import com.example.myapplication.data.local.entity.history.HistoryEntity
 import com.example.myapplication.data.local.entity.news.ArticleEntity
 import com.example.myapplication.data.local.type_converter.DateConverter
 
-@Database(entities = [HistoryEntity::class, ArticleEntity::class], version = 4)
+@Database(entities = [HistoryEntity::class, ArticleEntity::class], version = 5)
 @TypeConverters(DateConverter::class)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun historyDao(): HistoryDao

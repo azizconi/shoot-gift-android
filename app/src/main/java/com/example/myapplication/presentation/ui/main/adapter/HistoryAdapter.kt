@@ -8,9 +8,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import com.example.myapplication.data.local.entity.history.HistoryEntity
-import com.example.myapplication.utils.convertDate
-import okhttp3.internal.http.toHttpDateString
-import java.util.*
 
 class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
@@ -33,12 +30,10 @@ class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() 
         val currentItem = histories[position]
         holder.prize.text = currentItem.prizeWon
         holder.level.text =  "Уровень: ${currentItem.level}"
-//        Log.e("TAG", "onBindViewHolder: $", )
-        holder.date.text = convertDate(currentItem.date.toString()/*toHttpDateString()*/)
+        holder.date.text = currentItem.date.toString()//convertDate(currentItem.date.toString()/*toHttpDateString()*/)
     }
 
     override fun getItemCount(): Int {
-        Log.e("TAG", "getItemCount: ${histories.size}", )
         return histories.size
     }
 
