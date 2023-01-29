@@ -1,5 +1,6 @@
 package com.example.myapplication.presentation.ui.news.viewModel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,6 +34,7 @@ class NewsViewModel @Inject constructor(
         newsRepository.getNews().onEach { result ->
             when(result) {
                 is Resource.Success -> {
+                    Log.e("TAG", "getNews: Resource.Success", )
                     _newsState.value = newsState.value?.copy(
                         isLoading = false,
                         data = result.data?.articleEntities
@@ -40,6 +42,7 @@ class NewsViewModel @Inject constructor(
                     addNewsToDB(_newsState.value?.data!!)
                 }
                 is Resource.Error -> {
+                    Log.e("TAG", "getNews: Resource.Error", )
                     if (getNewsFromDB.value != null) {
                         _newsState.value = newsState.value?.copy(
                             isLoading = false,

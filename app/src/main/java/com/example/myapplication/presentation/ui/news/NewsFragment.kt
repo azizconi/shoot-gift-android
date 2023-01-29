@@ -60,14 +60,14 @@ class NewsFragment : Fragment(R.layout.fragment_news) {
 
         viewModel.newsState.observe(viewLifecycleOwner) { state ->
             progressBar.visibility = if (state.isLoading) {
-                viewModel.getNewsFromDB.removeObserver(newsObserver)
+//                viewModel.getNewsFromDB.removeObserver(newsObserver)
                 View.VISIBLE
             } else {
-                viewModel.getNewsFromDB.observe(viewLifecycleOwner, newsObserver)
                 View.GONE
             }
         }
 
+        viewModel.getNewsFromDB.observe(viewLifecycleOwner, newsObserver)
 
 
 
